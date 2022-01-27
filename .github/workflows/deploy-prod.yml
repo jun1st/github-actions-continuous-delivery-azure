@@ -36,10 +36,10 @@ jobs:
           name: webpack artifacts
           path: public/
 
-  Build-Docker-Image:
+  Build-And-Deploy:
     runs-on: ubuntu-latest
     needs: build
-    name: Build image and store in GitHub Packages
+    name: Build image and Deploy To Azure
     steps:
       - name: Checkout
         uses: actions/checkout@v1
@@ -64,23 +64,12 @@ jobs:
       - run: |
           docker build . -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/ttt-demo:${{ github.sha }}
           docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/ttt-demo:${{ github.sha }}
-
-  Deploy-to-Azure:
-    runs-on: ubuntu-latest
-    needs: Build-Docker-Image
-    name: Deploy app container to Azure
-    steps:
-      - name: "Login via Azure CLI"
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-      - name: Deploy web app container
-        uses: azure/webapps-deploy@v2
-        with:
+          
+      - uses: azure/webapps-deploy@v2
+        with: 
           app-name: ${{env.AZURE_WEBAPP_NAME}}
           images: ${{ secrets.REGISTRY_LOGIN_SERVER }}/ttt-demo:${{ github.sha }}
-
       - name: Azure logout
         run: |
-          az logout
+            az logout
+
