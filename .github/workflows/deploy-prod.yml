@@ -50,11 +50,6 @@ jobs:
           name: webpack artifacts
           path: public
 
-      - name: 'Login via Azure CLI'
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-
       - name: 'Build and push image'
         uses: azure/docker-login@v1
         with:
@@ -68,6 +63,7 @@ jobs:
       - uses: azure/webapps-deploy@v2
         with: 
           app-name: ${{env.AZURE_WEBAPP_NAME}}
+          publish-profile: ${{ secrets.PUBLISH_PROFILE }}
           images: ${{ secrets.REGISTRY_LOGIN_SERVER }}/ttt-demo:${{ github.sha }}
       - name: Azure logout
         run: |
